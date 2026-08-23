@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UPI FraudShield | Fake UPI Detector</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #07111f;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        /* HEADER */
+        header {
+            background: #091a2d;
+            border-bottom: 1px solid #1d3855;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #35d07f;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        nav a {
+            color: #c8d7e8;
+            text-decoration: none;
+            margin-left: 22px;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: #35d07f;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            padding: 70px 7%;
+            background:
+                radial-gradient(circle at 80% 20%, #123b5f 0, transparent 35%),
+                radial-gradient(circle at 20% 80%, #0c3c2c 0, transparent 30%),
+                #07111f;
+        }
+
+        .hero-content {
+            max-width: 760px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #35d07f18;
+            border: 1px solid #35d07f66;
+            color: #35d07f;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 7vw, 75px);
+            line-height: 1.05;
+            margin-bottom: 22px;
+        }
+
+        .green {
+            color: #35d07f;
+        }
+
+        .hero p {
+            color: #a9bdd1;
+            max-width: 680px;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 15px;
+        }
+
+        .primary {
+            background: #35d07f;
+            color: #04150b;
+        }
+
+        .secondary {
+            background: transparent;
+            border: 1px solid #365471;
+            color: white;
+        }
+
+        /* GENERAL */
+        section {
+            padding: 80px 7%;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .section-title h2 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #9eb3c9;
+        }
+
+        /* STATS */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 40px;
+        }
+
+        .stat {
+            background: #0d1d30;
+            border: 1px solid #1e3854;
+            padding: 25px;
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        .stat h3 {
+            color: #35d07f;
+            font-size: 35px;
+        }
+
+        .stat p {
+            color: #9eb3c9;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #0d1d30;
+            border: 1px solid #1e3854;
+            padding: 28px;
+            border-radius: 18px;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: #35d07f;
+        }
+
+        .card-icon {
+            font-size: 35px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #9eb3c9;
+        }
+
+        /* DETECTOR */
+        #detector {
+            background: #081725;
+        }
+
+        .detector-box {
+            max-width: 900px;
+            margin: auto;
+            background: #0d1d30;
+            border: 1px solid #1e3854;
+            border-radius: 22px;
+            padding: 35px;
+        }
+
+        .detector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d7e5f2;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #365471;
+            background: #071321;
+            color: white;
+            margin-bottom: 18px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #35d07f;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: #35d07f;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .analyze-btn:hover {
+            background: #54e694;
+        }
+
+        /* SIMULATED RECEIPT */
+        .receipt {
+            background: white;
+            color: #152538;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 350px;
+            margin: auto;
+            box-shadow: 0 20px 50px #0008;
+        }
+
+        .receipt-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .upi {
+            color: #1264a3;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .success {
+            color: #159447;
+            font-weight: bold;
+        }
+
+        .receipt h3 {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .amount {
+            text-align: center;
+            font-size: 42px;
+            font-weight: bold;
+            margin: 15px;
+        }
+
+        .receipt-info {
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+            padding-top: 15px;
+            font-size: 13px;
+        }
+
+        .receipt-info div {
+            display: flex;
+            justify-content: space-between;
+            margin: 9px 0;
+        }
+
+        /* RESULT */
+        .result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .danger {
+            background: #ff536318;
+            border: 1px solid #ff536355;
+            color: #ff91a0;
+        }
+
+        .safe {
+            background: #35d07f18;
+            border: 1px solid #35d07f55;
+            color: #65e99a;
+        }
+
+        /* GOLDEN RULE */
+        .golden {
+            max-width: 900px;
+            margin: auto;
+            background: linear-gradient(135deg, #123524, #0d2635);
+            border: 1px solid #35d07f55;
+            border-radius: 22px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .golden h2 {
+            color: #35d07f;
+            margin-bottom: 15px;
+        }
+
+        .golden p {
+            color: #c1d3e3;
+        }
+
+        /* PROTECTION */
+        .protection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .protection-item {
+            padding: 25px;
+            background: #0d1d30;
+            border: 1px solid #1e3854;
+            border-radius: 16px;
+        }
+
+        .protection-item h3 {
+            margin-bottom: 8px;
+        }
+
+        .protection-item p {
+            color: #9eb3c9;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #050d17;
+            border-top: 1px solid #1a3149;
+            padding: 35px 7%;
+            text-align: center;
+            color: #738aa1;
+        }
+
+        footer strong {
+            color: #35d07f;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 800px) {
+
+            header {
+                padding: 15px 5%;
+            }
+
+            nav {
+                display: none;
+            }
+
+            section {
+                padding: 60px 5%;
+            }
+
+            .hero {
+                padding: 60px 5%;
+            }
+
+            .stats,
+            .cards,
+            .detector-grid,
+            .protection {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 45px;
+            }
+
+            .detector-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+
+    <div class="logo">
+        🛡️ UPI <span>FraudShield</span>
+    </div>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#detector">Detector</a>
+        <a href="#scams">Scams</a>
+        <a href="#protect">Protection</a>
+    </nav>
+
+</header>
+
+
+<!-- HERO -->
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <div class="tag">
+            COLLEGE IDEATHON • AWARENESS PROJECT
+        </div>
+
+        <h1>
+            Don't trust the
+            <span class="green">screenshot.</span>
+        </h1>
+
+        <p>
+            UPI FraudShield is an educational fake-payment awareness
+            platform designed to help students recognize suspicious
+            payment screenshots, QR scams and phishing attempts.
+        </p>
+
+        <div class="buttons">
+
+            <a href="#detector" class="btn primary">
+                🔎 Try Detector
+            </a>
+
+            <a href="#protect" class="btn secondary">
+                🛡️ Learn Safety
+            </a>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <h3>01</h3>
+                <p>Verify payments</p>
+            </div>
+
+            <div class="stat">
+                <h3>02</h3>
+                <p>Protect your PIN</p>
+            </div>
+
+            <div class="stat">
+                <h3>03</h3>
+                <p>Stop before paying</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- DETECTOR -->
+<section id="detector">
+
+    <div class="section-title">
+
+        <h2>🔎 Fake Payment Detector</h2>
+
+        <p>
+            Educational simulation — no real UPI transaction is checked.
+        </p>
+
+    </div>
+
+
+    <div class="detector-box">
+
+        <div class="detector-grid">
+
+            <!-- INPUT -->
+            <div>
+
+                <h2>Analyze Demo Receipt</h2>
+
+                <p style="color:#9eb3c9;margin:10px 0 25px;">
+                    Enter the information shown on the simulated
+                    payment receipt.
+                </p>
+
+                <label>
+                    Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="amount"
+                    value="500"
+                    min="1"
+                >
+
+
+                <label>
+                    Transaction ID
+                </label>
+
+                <input
+                    type="text"
+                    id="transaction"
+                    value="DEMO-12345-FAKE"
+                >
+
+
+                <button
+                    class="analyze-btn"
+                    onclick="analyzePayment()"
+                >
+                    🔍 Analyze Payment
+                </button>
+
+
+                <div
+                    id="result"
+                    class="result"
+                ></div>
+
+            </div>
+
+
+            <!-- RECEIPT -->
+            <div>
+
+                <div class="receipt">
+
+                    <div class="receipt-top">
+
+                        <div class="upi">
+                            UPI
+                        </div>
+
+                        <div class="success">
+                            ✓ SUCCESS
+                        </div>
+
+                    </div>
+
+
+                    <h3>
+                        Payment Successful
+                    </h3>
+
+
+                    <div class="amount">
+                        ₹<span id="receiptAmount">
+                            500
+                        </span>
+                    </div>
+
+
+                    <p style="text-align:center;color:#718096;">
+                        Paid to
+                    </p>
+
+                    <h3>
+                        Demo Seller
+                    </h3>
+
+                    <p style="text-align:center;color:#718096;">
+                        demo@upi
+                    </p>
+
+
+                    <div class="receipt-info">
+
+                        <div>
+                            <span>Transaction ID</span>
+
+                            <strong id="receiptTransaction">
+                                DEMO-12345-FAKE
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span>Date</span>
+
+                            <strong>
+                                DEMO
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span>Status</span>
+
+                            <strong class="success">
+                                SUCCESS
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- SCAMS -->
+<section id="scams">
+
+    <div class="section-title">
+
+        <h2>🚨 Common UPI Scams</h2>
+
+        <p>
+            Learn the warning signs before you become a victim.
+        </p>
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-icon">
+                🧾
+            </div>
+
+            <h3>
+                Fake Payment Screenshots
+            </h3>
+
+            <p>
+                Fraudsters may send edited screenshots claiming
+                that money has been transferred. A screenshot is
+                not proof of payment.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                📱
+            </div>
+
+            <h3>
+                QR Code Scams
+            </h3>
+
+            <p>
+                Scammers may tell you to scan a QR code to receive
+                money. Be careful: approving a payment request can
+                send money from your account.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-icon">
+                🎣
+            </div>
+
+            <h3>
+                Phishing & Fake Apps
+            </h3>
+
+            <p>
+                Fake apps and links can imitate legitimate banking
+                or payment services and attempt to steal sensitive
+                information.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- GOLDEN RULE -->
+<section>
+
+    <div class="golden">
+
+        <h2>
+            🔐 THE GOLDEN RULE
+        </h2>
+
+        <p>
+            Your UPI PIN is used when you are making a payment.
+            Never enter your UPI PIN, OTP or banking password
+            because someone tells you that you need it to
+            receive money.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- PROTECTION -->
+<section id="protect">
+
+    <div class="section-title">
+
+        <h2>🛡️ Protect Yourself</h2>
+
+        <p>
+            Simple habits can prevent many digital-payment scams.
+        </p>
+
+    </div>
+
+
+    <div class="protection">
+
+        <div class="protection-item">
+
+            <h3>
+                👀 Verify Incoming Payments
+            </h3>
+
+            <p>
+                Check your actual UPI application or bank account
+                transaction history instead of trusting a screenshot
+                sent by another person.
+            </p>
+
+        </div>
+
+
+        <div class="protection-item">
+
+            <h3>
+                🔒 Protect Your PIN & OTP
+            </h3>
+
+            <p>
+                Never share your UPI PIN, OTP, password or other
+                confidential banking credentials with anyone.
+            </p>
+
+        </div>
+
+
+        <div class="protection-item">
+
+            <h3>
+                🚨 Don't Fall for Pressure
+            </h3>
+
+            <p>
+                Messages such as "pay immediately" or "your money
+                will be lost" can be manipulation tactics. Stop
+                and verify first.
+            </p>
+
+        </div>
+
+
+        <div class="protection-item">
+
+            <h3>
+                📲 Avoid Unknown Links
+            </h3>
+
+            <p>
+                Be careful with suspicious SMS, email and social
+                media links that ask you to provide banking or
+                payment information.
+            </p>
+
+        </div>
+
+
+        <div class="protection-item">
+
+            <h3>
+                🖥️ Don't Share Your Screen
+            </h3>
+
+            <p>
+                Never give unknown people remote or screen-sharing
+                access to your device to solve a supposed payment
+                problem.
+            </p>
+
+        </div>
+
+
+        <div class="protection-item">
+
+            <h3>
+                📞 Verify the Person
+            </h3>
+
+            <p>
+                If someone contacts you about a payment, verify
+                their identity through a trusted communication
+                method before taking action.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- PRESENTATION SECTION -->
+<section>
+
+    <div class="detector-box">
+
+        <div class="section-title" style="margin-bottom:20px;">
+
+            <h2>💡 Remember</h2>
+
+            <p>
+                Verify before you trust. Think before you pay.
+            </p>
+
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="card-icon">
+                    👁️
+                </div>
+
+                <h3>
+                    SEE
+                </h3>
+
+                <p>
+                    Look for unusual transaction IDs,
+                    inconsistent details and suspicious requests.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🧠
+                </div>
+
+                <h3>
+                    THINK
+                </h3>
+
+                <p>
+                    Don't allow urgency or pressure to make
+                    you approve a payment.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🛡️
+                </div>
+
+                <h3>
+                    VERIFY
+                </h3>
+
+                <p>
+                    Confirm the actual transaction inside your
+                    trusted UPI application.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+
+    <p>
+        <strong>UPI FraudShield</strong>
+        — Educational Cyber Safety Project
+    </p>
+
+    <p>
+        This website is a demonstration for awareness purposes.
+        It does not connect to UPI, banks or real payment systems.
+    </p>
+
+    <p style="margin-top:15px;">
+        © 2026 UPI FraudShield • College Presentation
+    </p>
+
+</footer>
+
+
+<script>
+
+    function analyzePayment() {
+
+        const amount =
+            document.getElementById("amount").value;
+
+        const transaction =
+            document.getElementById("transaction").valu
