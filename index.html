@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Counter Check — Spot a fake UPI payment before you hand over the goods</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A28;
+    --paper:#ECE7D8;
+    --paper-raised:#F5F1E6;
+    --line:#C6BEA4;
+    --danger:#B23A1F;
+    --danger-bg:#F3DED4;
+    --safe:#3B7A56;
+    --safe-bg:#DCE9DD;
+    --stamp:#B5842A;
+    --muted:#6B6255;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 34px,
+        rgba(27,42,40,0.05) 35px
+      );
+  }
+
+  ::selection{background:var(--stamp); color:var(--paper-raised);}
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* HEADER */
+  header.top{
+    padding:28px 24px 0;
+    max-width:760px;
+    margin:0 auto;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:16px;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.15rem;
+    letter-spacing:0.01em;
+  }
+  .brand span{color:var(--danger);}
+  nav.top-nav a{
+    font-size:0.85rem;
+    text-decoration:none;
+    color:var(--muted);
+    margin-left:20px;
+  }
+  nav.top-nav a:hover{color:var(--ink);}
+
+  /* HERO */
+  .hero{
+    padding:64px 0 40px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-size:clamp(2.1rem, 5vw, 3.1rem);
+    font-weight:600;
+    line-height:1.08;
+    margin:0 0 22px;
+    max-width:14ch;
+  }
+  .hero p.lede{
+    font-size:1.15rem;
+    max-width:52ch;
+    color:#39433f;
+    margin:0 0 30px;
+  }
+  .hero-stamp{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    border:1.5px solid var(--danger);
+    color:var(--danger);
+    padding:8px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.8rem;
+    transform:rotate(-1.2deg);
+    background:var(--danger-bg);
+  }
+
+  /* SCAM EXPLAINER */
+  .explainer{
+    padding:36px 0 8px;
+    border-top:1px solid var(--line);
+  }
+  .explainer h2{
+    font-family:'Fraunces', serif;
+    font-size:1.5rem;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .explainer p{
+    max-width:62ch;
+    color:#39433f;
+  }
+  .tactics{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:22px;
+  }
+  .tactic{
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    padding:16px 18px;
+  }
+  .tactic .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.75rem;
+    color:var(--muted);
+    display:block;
+    margin-bottom:6px;
+  }
+  .tactic h3{
+    margin:0 0 6px;
+    font-size:0.98rem;
+    font-weight:600;
+  }
+  .tactic p{
+    margin:0;
+    font-size:0.9rem;
+    color:#4a5450;
+  }
+
+  /* CHECKER SECTION */
+  section.checker{
+    margin-top:52px;
+    border-top:1px solid var(--line);
+    padding:40px 0 8px;
+  }
+  .checker h2{
+    font-family:'Fraunces', serif;
+    font-size:1.6rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .checker > p{
+    color:#39433f;
+    max-width:58ch;
+    margin-bottom:28px;
+  }
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:26px;
+  }
+
+  .field{
+    margin-bottom:20px;
+  }
+  .field label{
+    display:block;
+    font-size:0.85rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .field .hint{
+    font-size:0.78rem;
+    color:var(--muted);
+    font-weight:400;
+    display:block;
+    margin-top:3px;
+  }
+  .field input[type="text"]{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.95rem;
+    color:var(--ink);
+  }
+  .field input[type="text"]:focus{
+    outline:2px solid var(--stamp);
+    outline-offset:1px;
+  }
+
+  fieldset{
+    border:none;
+    padding:0;
+    margin:0 0 22px;
+  }
+  fieldset legend{
+    font-size:0.85rem;
+    font-weight:600;
+    margin-bottom:10px;
+    padding:0;
+  }
+  .check-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px dashed var(--line);
+    font-size:0.92rem;
+  }
+  .check-row:last-child{border-bottom:none;}
+  .check-row input{
+    margin-top:4px;
+    width:16px;
+    height:16px;
+    accent-color:var(--danger);
+    flex-shrink:0;
+  }
+  .check-row label{cursor:pointer;}
+
+  button#analyze{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.9rem;
+    font-weight:600;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    padding:14px 22px;
+    cursor:pointer;
+    letter-spacing:0.02em;
+  }
+  button#analyze:hover{background:#0f1c1a;}
+  button#analyze:focus-visible{outline:2px solid var(--stamp); outline-offset:2px;}
+
+  /* RESULT */
+  #result{
+    margin-top:26px;
+    display:none;
+  }
+  #result.show{display:block;}
+  .verdict{
+    border:2px solid var(--ink);
+    padding:22px 24px;
+    position:relative;
+  }
+  .verdict.danger{border-color:var(--danger); background:var(--danger-bg);}
+  .verdict.caution{border-color:var(--stamp); background:#F3E7CE;}
+  .verdict.safe{border-color:var(--safe); background:var(--safe-bg);}
+
+  .verdict .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.75rem;
+    font-weight:600;
+    letter-spacing:0.04em;
+    display:inline-block;
+    margin-bottom:10px;
+    transform:rotate(-1.5deg);
+    border:1.5px solid currentColor;
+    padding:4px 10px;
+  }
+  .verdict.danger .tag{color:var(--danger);}
+  .verdict.caution .tag{color:#8a611e;}
+  .verdict.safe .tag{color:var(--safe);}
+
+  .verdict h3{
+    font-family:'Fraunces', serif;
+    font-size:1.25rem;
+    margin:0 0 10px;
+  }
+  .verdict ul{
+    margin:12px 0 0;
+    padding-left:20px;
+    font-size:0.92rem;
+  }
+  .verdict li{margin-bottom:6px;}
+
+  /* HOW TO ACTUALLY VERIFY */
+  section.verify{
+    margin-top:52px;
+    border-top:1px solid var(--line);
+    padding:40px 0;
+  }
+  section.verify h2{
+    font-family:'Fraunces', serif;
+    font-size:1.6rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  section.verify > p{
+    color:#39433f;
+    max-width:58ch;
+    margin-bottom:26px;
+  }
+  ol.steps{
+    list-style:none;
+    padding:0;
+    margin:0;
+    counter-reset:step;
+  }
+  ol.steps li{
+    counter-increment:step;
+    display:grid;
+    grid-template-columns:40px 1fr;
+    gap:16px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  ol.steps li:last-child{border-bottom:none;}
+  ol.steps li::before{
+    content:counter(step);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:1.1rem;
+    color:var(--stamp);
+    font-weight:600;
+  }
+  ol.steps h3{margin:0 0 4px; font-size:1rem; font-weight:600;}
+  ol.steps p{margin:0; font-size:0.92rem; color:#4a5450;}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:28px 0 50px;
+    font-size:0.8rem;
+    color:var(--muted);
+    max-width:760px;
+    margin:0 auto;
+    padding-left:24px;
+    padding-right:24px;
+  }
+
+  @media (max-width:600px){
+    .tactics{grid-template-columns:1fr;}
+    ol.steps li{grid-template-columns:28px 1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">Counter<span>Check</span></div>
+  <nav class="top-nav">
+    <a href="#checker">Check a payment</a>
+    <a href="#verify">Real verification</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="hero-stamp">⚠ SCREENSHOTS CAN BE FAKED</div>
+    <h1>A payment screenshot is not a payment.</h1>
+    <p class="lede">Before you hand over goods or unlock a service, run the details past this screening tool — then confirm the only way that actually counts: your own bank or UPI app.</p>
+  </section>
+
+  <section class="explainer">
+    <h2>How the scam usually works</h2>
+    <p>None of these require any technical skill — that's why the scam is so common at shop counters, on marketplace sites, and in delivery handoffs.</p>
+    <div class="tactics">
+      <div class="tactic">
+        <span class="num">01</span>
+        <h3>Edited screenshot</h3>
+        <p>A real UPI app's "success" screen is copied and the amount, name, or time is changed before it's sent to you.</p>
+      </div>
+      <div class="tactic">
+        <span class="num">02</span>
+        <h3>Look-alike app</h3>
+        <p>A generic app is styled to resemble a bank or UPI app, generating a fake confirmation screen that was never sent by any bank.</p>
+      </div>
+      <div class="tactic">
+        <span class="num">03</span>
+        <h3>Collect request, not payment</h3>
+        <p>You're sent a "collect" request instead of receiving money — approving it on your end actually sends money out of your account.</p>
+      </div>
+      <div class="tactic">
+        <span class="num">04</span>
+        <h3>Cancelled after the fact</h3>
+        <p>A real payment is sent, you see it land, then it's reversed or disputed once the goods are already gone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="checker" id="checker">
+    <h2>Screen a payment screenshot</h2>
+    <p>This checks the reference number format and known red flags. It's a screening aid, not proof — it cannot contact any bank, so it can never confirm money actually reached your account.</p>
+
+    <div class="panel">
+      <div class="field">
+        <label for="utr">UTR / Reference number shown on the screenshot</label>
+        <input type="text" id="utr" placeholder="e.g. 402913876542">
+        <span class="hint">A genuine UPI reference number is normally 12 digits.</span>
+      </div>
+
+      <fieldset>
+        <legend>Tick anything that's true of this payment</legend>
+        <div class="check-row">
+          <input type="checkbox" id="c1"><label for="c1">It arrived as a forwarded screenshot or WhatsApp image, not a notification from your own bank or UPI app</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="c2"><label for="c2">The sender is asking you to hurry, hand over goods immediately, or not "bother checking"</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="c3"><label for="c3">Your own bank app or account balance doesn't show the credit yet</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="c4"><label for="c4">You received a "collect request" or were asked to enter your UPI PIN to "receive" the money</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="c5"><label for="c5">The image looks cropped, zoomed in, or has mismatched fonts/alignment</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="c6"><label for="c6">The name, amount, or time on the screenshot doesn't match what you expected</label>
+        </div>
+      </fieldset>
+
+      <button id="analyze">Check this payment</button>
+
+      <div id="result">
+        <div class="verdict" id="verdictBox">
+          <div class="tag" id="verdictTag">RESULT</div>
+          <h3 id="verdictTitle"></h3>
+          <p id="verdictText"></p>
+          <ul id="verdictList"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="verify" id="verify">
+    <h2>The only check that actually proves it</h2>
+    <p>A website, a screenshot, or an SMS forward can all be faked. These three things cannot.</p>
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Open your own banking or UPI app directly</h3>
+          <p>Don't tap a link or open an app from the sender's message. Open the app icon on your own phone, from your own home screen.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Check your balance or statement, not a message</h3>
+          <p>Look for the actual credit entry with a matching amount and time. A notification banner can be spoofed; a balance change on your own statement can't.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>If in doubt, wait it out</h3>
+          <p>Bank credits typically reflect within seconds to a couple of minutes. It's reasonable to ask a buyer to wait while you check — genuine payers won't mind.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+</div>
+
+<footer>
+  This tool offers a heuristic screening checklist based on common UPI scam patterns. It does not connect to any bank, PSP, or NPCI system, and cannot confirm whether a transaction actually took place. Always verify by checking your own account directly before releasing goods, services, or funds.
+</footer>
+
+<script>
+(function(){
+  const analyzeBtn = document.getElementById('analyze');
+  const result = document.getElementById('result');
+  const verdictBox = document.getElementById('verdictBox');
+  const verdictTag = document.getElementById('verdictTag');
+  const verdictTitle = document.getElementById('verdictTitle');
+  const verdictText = document.getElementById('verdictText');
+  const verdictList = document.getElementById('verdictList');
+
+  function checkUTR(raw){
+    const value = raw.trim();
+    const flags = [];
+    if(value.length === 0){
+      return { flags: ['No reference number was entered, so its format can\'t be checked.'], severity: 0 };
+    }
+    const digitsOnly = /^[0-9]+$/.test(value);
+    if(!digitsOnly){
+      flags.push('A genuine UTR is numeric only — this one contains letters or symbols.');
+    }
+    if(digitsOnly && value.length !== 12){
+      flags.push(`This is ${value.length} digits long. Genuine UPI reference numbers are almost always exactly 12 digits.`);
+    }
+    if(digitsOnly && /^(\d)\1+$/.test(value)){
+      flags.push('Every digit is the same — real bank-generated references don\'t look like this.');
+    }
+    if(digitsOnly && /^0123456789|123456789012|012345678901$/.test(value)){
+      flags.push('This looks like a sequential placeholder number, not a bank-issued reference.');
+    }
+    return { flags, severity: flags.length };
+  }
+
+  analyzeBtn.addEventListener('click', function(){
+    const utrVal = document.getElementById('utr').value;
+    const utrCheck = checkUTR(utrVal);
+
+    const boxChecks = [
+      { id:'c1', weight:2, label:'Arrived only as a forwarded screenshot/message, not your own bank notification' },
+      { id:'c2', weight:2, label:'Sender is pushing urgency or discouraging you from checking' },
+      { id:'c3', weight:3, label:'Your own account doesn\'t show the credit yet' },
+      { id:'c4', weight:3, label:'Involves a "collect request" or entering your UPI PIN to receive money' },
+      { id:'c5', weight:1, label:'Image shows signs of cropping or editing' },
+      { id:'c6', weight:1, label:'Details on screen don\'t match what you expected' }
+    ];
+
+    let score = utrCheck.severity * 2;
+    const reasons = [...utrCheck.flags];
+
+    boxChecks.forEach(function(item){
+      if(document.getElementById(item.id).checked){
+        score += item.weight;
+        reasons.push(item.label);
+      }
+    });
+
+    result.classList.add('show');
+    verdictBox.classList.remove('danger','caution','safe');
+    verdictList.innerHTML = '';
+
+    if(score >= 5){
+      verdictBox.classList.add('danger');
+      verdictTag.textContent = 'HIGH RISK';
+      verdictTitle.textContent = 'Treat this as unverified. Do not release goods or funds yet.';
+      verdictText.textContent = 'Several strong signals here match common fake-payment tactics. Confirm the credit in your own bank app before doing anything else.';
+    } else if(score >= 2){
+      verdictBox.classList.add('caution');
+      verdictTag.textContent = 'NEEDS A CLOSER LOOK';
+      verdictTitle.textContent = 'A few things don\'t add up yet.';
+      verdictText.textContent = 'Nothing here confirms it\'s fake, but nothing confirms it\'s real either. Check your own account balance before proceeding.';
+    } else {
+      verdictBox.classList.add('safe');
+      verdictTag.textContent = 'NO RED FLAGS FOUND';
+      verdictTitle.textContent = 'Nothing suspicious turned up in this screen.';
+      verdictText.textContent = 'Still, this only checked format and known patterns. The one thing that actually proves a payment is your own bank app showing the credit — check that before releasing anything.';
+    }
+
+    if(reasons.length){
+      reasons.forEach(function(r){
+        const li = document.createElement('li');
+        li.textContent = r;
+        verdictList.appendChild(li);
+      });
+    }
+
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+})();
+</script>
+
+</body>
+</html>
